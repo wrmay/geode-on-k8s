@@ -1,58 +1,71 @@
 ---
-# tasks file for geode
+- name: add runas user 
+  command: adduser -D {{ runas_user }}
+    
 - name: install required software
   apk:
-    name: ['openjdk8', 'git']
+    name: ['openjdk8', 'git', 'tar', 'bash','ncurses']
     update_cache: yes
 
-
+# Alpine linux doesn't use pam by default so these tasks are skipped
 #- name: increase nproc soft limit
-#    pam_limits:
-#        domain: "{{ ansible_ssh_user }}"
-#        limit_item: nproc
-#        limit_type: soft
-#        value: 8192
+#  become: yes
+#  pam_limits:
+#    domain: "{{ runas_user }}"
+#    limit_item: nproc
+#    limit_type: soft
+#    value: 8192
 #
 #- name: increase nproc hard limit
-#    pam_limits:
-#        domain: "{{ ansible_ssh_user }}"
-#        limit_item: nproc
-#        limit_type: hard
-#        value: 81920
+#  pam_limits:
+#    domain: "{{ runas_user }}"
+#    limit_item: nproc
+#    limit_type: hard
+#    value: 81920
 #
-#- name: increase somaxcon
-#    sysctl:
-#        name: net.core.somaxconn
-#        value: 1280
-#
-#- name: disable syn cookies
-#    sysctl:
-#        name: net.ipv4.tcp_syncookies
-#        value: 0
-#
-#- name: download and unpack GemFire 9.3
-#    unarchive:
-#        remote_src: yes
-#        src: http://download.pivotal.com.s3.amazonaws.com/gemfire/9.3.0/pivotal-gemfire-9.3.0.zip
-#        dest: /runtime
-#        owner: "{{ ansible_ssh_user }}"
-#        group: "{{ ansible_ssh_user }}"
-#
-#- name: create GemFire symbolic link
-#    file:
-#        path: /runtime/gemfire
-#        src: /runtime/pivotal-gemfire-9.3.0
-#        state: link
-#        owner: "{{ ansible_ssh_user }}"
-#        group: "{{ ansible_ssh_user }}"
-#
+
+- name: increase somaxcon
+  sysctl:
+      name: net.core.somaxconn
+      value: 1280
+
+- name: disable syn cookies
+  sysctl:
+    name: net.ipv4.tcp_syncookies
+    value: 0
+
+- name: make the runtime directory 
+  file:
+    path: /runtime
+    state: directory 
+    owner: "{{ runas_user }}"
+    
+- name: download geode 
+  get_url:
+    url: "{{ geode_download.url }}"
+    dest: /runtime 
+    checksum: "{{ geode_download.checksum }}"
+  
+- name: unpack geode
+  unarchive: 
+    src: /runtime/{{ geode_download.url | urlsplit('path') | basename }}
+    dest: /runtime
+    remote_src: yes
+    owner: "{{ runas_user }}"
+
+- name: create Geode symbolic link
+  file:
+      path: /runtime/geode
+      src: /runtime/{{ geode_download.url | urlsplit('path') | basename | replace('.tgz','') }}
+      state: link
+      owner: "{{ runas_user }}"
+
 #- name: download and unpack Maven
 #    unarchive:
 #        remote_src: yes
 #        src:  http://apache.cs.utah.edu/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz
 #        dest: /runtime
-#        owner: "{{ ansible_ssh_user }}"
-#        group: "{{ ansible_ssh_user }}"
+#        owner: "{{ runas_user }}"
 #
 #- name: create Maven symbolic link
 #    file:
@@ -60,8 +73,7 @@
 #        src: /runtime/apache-maven-3.6.0
 #        remote_src: yes
 #        state: link
-#        owner: "{{ ansible_ssh_user }}"
-#        group: "{{ ansible_ssh_user }}"
+#        owner: "{{ runas_user }}"
 #
 #- name: configure the bash profile
 #    copy:

@@ -12,4 +12,6 @@ Notes:
 
  ```
  pip install --force-reinstall pip==9.0.3 
+ pip install ansible-container[docker,k8s]
+ pip install docker==2.7.0
  ``` 

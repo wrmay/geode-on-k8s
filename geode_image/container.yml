@@ -56,12 +56,11 @@ services:
   #   dev_overrides:
   #     environment:
   #       - "DEBUG=1"
-  geode:
+  locator:
     from: "alpine:3.5"
+    command: /bin/bash
     roles:
-      - geode
-    ports: 
-      - "10000:10000"
+      - base
     
 registries: {}
   # Add optional registries used for deployment. For example:
