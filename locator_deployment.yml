@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locator-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locator
+  template:
+    metadata:
+      labels:
+        app: locator
+    spec:
+      containers:
+      - name: locator
+        image: docker.io/wrmay/geode-base:20190124154347
+        command: ['/usr/bin/dumb-init','/usr/lib/jvm/java-1.8-openjdk/jre/bin/java', '-server', '-classpath', '/runtime/geode/lib/geode-core-1.7.0.jar:/runtime/geode/lib/geode-dependencies.jar','-Dgemfire.http-service-port=10070', '-Dgemfire.enable-cluster-configuration=true', '-Dgemfire.load-cluster-configuration-from-dir=false', '-Dgemfire.jmx-manager-port=10099','-Dgemfire.jmx-manager=true' ,'-Dgemfire.jmx-manager-start=true','-Dgemfire.launcher.registerSignalHandlers=true', '-Djava.awt.headless=true', '-Dsun.rmi.dgc.server.gcInterval=9223372036854775806','org.apache.geode.distributed.LocatorLauncher', 'start', 'locator', '--port=10000', '/runtime/geode_cluster/datanode']
+        workingDir: /runtime/geode_cluster/locator

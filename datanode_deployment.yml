@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datanode-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: datanode
+  template:
+    metadata:
+      labels:
+        app: datanode
+    spec:
+      containers:
+      - name: datanode
+        env:
+          - name: PODNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        image: docker.io/wrmay/geode-base:20190124154347
+        command: ['/usr/bin/dumb-init','/usr/lib/jvm/java-1.8-openjdk/jre/bin/java', '-server', '-classpath', '/runtime/geode/lib/geode-core-1.7.0.jar:/runtime/geode/lib/geode-dependencies.jar','-Dgemfire.locators=locator-service[10000]','-Dgemfire.start-dev-rest-api=false','-Dgemfire.use-cluster-configuration=true','-Dgemfire.launcher.registerSignalHandlers=true', '-Djava.awt.headless=true', '-Dsun.rmi.dgc.server.gcInterval=9223372036854775806','org.apache.geode.distributed.ServerLauncher', 'start', '$(PODNAME)', '--server-port=10101', '/runtime/geode_cluster/datanode']
+        workingDir: /runtime/geode_cluster/datanode

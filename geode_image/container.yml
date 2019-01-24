@@ -14,7 +14,7 @@ settings:
   # For built services, concatenated with service name to form the built image name.
   project_name: geode
 
-  # The deployment_output_path is mounted to the Conductor container, and the 
+  # The deployment_output_path is mounted to the Conductor container, and the
   # `run` and `deployment` commands then write generated Ansible playbooks to it.
   # deployment_output_path: ./ansible-deployment
 
@@ -56,14 +56,15 @@ services:
   #   dev_overrides:
   #     environment:
   #       - "DEBUG=1"
-  locator:
+  base:
     from: "alpine:3.5"
-    command: /bin/bash
     roles:
-      - base
-    
+      - geode_base
+    user: geode  # this should be parameterized
+
+
 registries: {}
   # Add optional registries used for deployment. For example:
   #  google:
   #    url: https://gcr.io
-  #    namespace: my-cool-project-xxxxxx   
+  #    namespace: my-cool-project-xxxxxx

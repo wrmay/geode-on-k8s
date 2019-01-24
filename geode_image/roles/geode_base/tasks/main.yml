@@ -1,10 +1,10 @@
 ---
-- name: add runas user 
+- name: add runas user
   command: adduser -D {{ runas_user }}
-    
+
 - name: install required software
   apk:
-    name: ['openjdk8', 'git', 'tar', 'bash','ncurses']
+    name: ['openjdk8', 'git', 'tar', 'bash','ncurses','dumb-init']
     update_cache: yes
 
 # Alpine linux doesn't use pam by default so these tasks are skipped
@@ -34,20 +34,26 @@
     name: net.ipv4.tcp_syncookies
     value: 0
 
-- name: make the runtime directory 
+- name: make the locator working dir
   file:
-    path: /runtime
-    state: directory 
+    path: /runtime/geode_cluster/locator
+    state: directory
     owner: "{{ runas_user }}"
-    
-- name: download geode 
+
+- name: make the datanode working dir
+  file:
+    path: /runtime/geode_cluster/datanode
+    state: directory
+    owner: "{{ runas_user }}"
+
+- name: download geode
   get_url:
     url: "{{ geode_download.url }}"
-    dest: /runtime 
+    dest: /runtime
     checksum: "{{ geode_download.checksum }}"
-  
+
 - name: unpack geode
-  unarchive: 
+  unarchive:
     src: /runtime/{{ geode_download.url | urlsplit('path') | basename }}
     dest: /runtime
     remote_src: yes

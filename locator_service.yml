@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: locator-service
+spec:
+  selector:
+    app: locator
+  ports:
+  - name: locator
+    protocol: TCP
+    port: 10000
+    targetPort: 10000
+  - name: jmx-manager
+    protocol: TCP
+    port: 10099
+    targetPort: 10099
